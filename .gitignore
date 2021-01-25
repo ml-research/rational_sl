@@ -1,0 +1,10 @@
+*trained_networks
+*data
+*checkpoint
+*__pycache__
+*images
+*.svg
+*.pdf
+*.pkl
+*.pth
+*/example/runs
