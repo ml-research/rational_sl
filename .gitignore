@@ -7,4 +7,5 @@
 *.pdf
 *.pkl
 *.pth
-*/example/runs
+*.pt
+*/examples/runs
