@@ -11,9 +11,7 @@ import argparse
 from rtpt import RTPT
 from utils import choose_layer, compute_number_of_exps, make_deter, accuracy, \
     perform_surgery, identity_rational, one_train, one_validate, make_loaders, \
-    augmented_print
-from imagenet import train as retrain
-from imagenet import validate as revalidate
+    augmented_print, revalidate, retrain
 
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -21,7 +19,7 @@ parser.add_argument('data', metavar='DIR',
                     help='path to dataset')
 parser.add_argument('-s', '--seed', default=0, type=int,
                     help='random seed to be fixed')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=512, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
@@ -36,7 +34,7 @@ parser.add_argument('--use_id', default=False, action="store_true",
                     help='if true, replace a module with an Identity Layer')
 parser.add_argument('--use_rat', default=False, action="store_true",
                     help='if true, replace a module with a Rational')
-parser.add_argument('-e', '--epochs', default=20, type=int,
+parser.add_argument('-e', '--epochs', default=15, type=int,
                     help='number of epochs for retraining')
 sp_help = 'For --surgered_part:\n' + \
           'either random or $l.$k with $l in [1:4] ' + \
@@ -68,7 +66,7 @@ for fold in [model_save_folder, score_save_folder]:
 
 total_exps = compute_number_of_exps(args)
 rtpt = RTPT(name_initials='QD', experiment_name=f'ResNetSurgery_s{args.seed}',
-            max_iterations=total_exps * (len(train_loader) + len(val_loader)))
+            max_iterations=args.epochs)
 rtpt.start()
 
 if args.eval_original:
@@ -129,6 +127,7 @@ if args.use_rat:
         print(f"Epoch {epoch} Modified Resnet: (Rational)")
         print(f"Train : Loss: {train_loss} | acc@1: {train_acc1} | acc5: {train_acc5}")
         print(f"Test  : Loss: { test_loss} | acc@1: { test_acc1} | acc5: { test_acc5}")
+        rtpt.step()
     filename = f"surgered_trained_rat_{layer}_block{block_n}"
     score_dict = {"layer": layer, "block_n": block_n,
                   "train_loss": train_losses, "test_loss": test_losses,
