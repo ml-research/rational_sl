@@ -2,27 +2,24 @@ import torch
 import numpy as np
 
 import pickle
-torch.manual_seed(17)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
-np.random.seed(17)
 import argparse
-import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib
 import os
-from rational.torch import Rational, RecurrentRational, RecurrentRationalModule
+from rational.torch import Rational, RecurrentRationalModule
 from torchvision import datasets, transforms
-from torch.utils.tensorboard import SummaryWriter
-from mnist import VGG, LeNet5, actfvs
-from matplotlib import pyplot as plt
+from mnist import VGG, LeNet5
+
+
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+torch.set_anomaly_enabled(True)
+
 font = {'family': 'normal',
         'weight': 'bold',
         'size': 22}
 
 matplotlib.rc('font', **font)
-
-torch.set_anomaly_enabled(True)
 
 
 def test(args, model, device, test_loader, epoch):
@@ -143,6 +140,7 @@ def main():
                 pickle.dump(fig_dicts, open(f'{args.dataset}_{args.arch}_{activation_function_key}_(acc{acc}%).fig.pkl', "wb"))
             else:
                 print("No Rational Activations found. Exit without plotting")
+
 
 if __name__ == '__main__':
     main()

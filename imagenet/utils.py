@@ -1,7 +1,6 @@
 import random
 import numpy as np
 import torch
-from tqdm import tqdm
 import os
 import torchvision
 import torchvision.datasets as datasets
@@ -45,93 +44,53 @@ def make_loaders(args):
     return train_loader, val_loader
 
 
-def one_train(net, rtpt, train_loader, criterion):
-    total_loss = 0
-    total_acc1 = 0
-    total_acc5 = 0
-    total_iter = len(train_loader)
-    with tqdm(total=total_iter) as pbar:
-        for batch_idx, (input, target) in enumerate(train_loader):
-            input = input.cuda()
-            target = target.cuda()
-            # compute output
-            with torch.no_grad():
-                output = net(input)
-                loss = criterion(output, target)
-
-            # measure accuracy and record loss
-            acc1, acc5 = accuracy(output, target, topk=(1, 5))
-            total_loss += loss.item()
-            total_acc1 += acc1.item()
-            total_acc5 += acc5.item()
-            pbar.update(1)
-            rtpt.step()
-    return total_loss/total_iter, total_acc1/total_iter, total_acc5/total_iter
-
-def one_validate(net, rtpt, val_loader, criterion):
-    total_loss = 0
-    total_acc1 = 0
-    total_acc5 = 0
-    total_iter = len(val_loader)
-    with torch.no_grad():
-        with tqdm(total=total_iter) as pbar:
-            for i, (input, target) in enumerate(val_loader):
-                input = input.cuda()
-                target = target.cuda()
-
-                # compute output
-                output = net(input)
-                loss = criterion(output, target)
-
-                # measure accuracy and record loss
-                # measure accuracy and record loss
-                acc1, acc5 = accuracy(output, target, topk=(1, 5))
-                total_loss += loss.item()
-                total_acc1 += acc1.item()
-                total_acc5 += acc5.item()
-                pbar.update(1)
-                rtpt.step()
-    return total_loss/total_iter, total_acc1/total_iter, total_acc5/total_iter
-
-def choose_layer(args, sp_help):
+def choose_parts(args, sp_help):
     bottleneck_dict = {"layer1": 3, "layer2": 4, "layer3": 23, "layer4": 3}
-    if args.surgered_part != "random":
-        if not (args.use_id or args.use_rat):
-            print('No use of giving bottleneck to perform surgery on if ' +
-                  '"--use_id" and "--use_rat are not given"')
-            exit(1)
-        try:
-            lay, blo = args.surgered_part.split('.')
-            if int(lay) not in range(1, 5):
-                print(sp_help)
-                print("Available layers: 1, 2, 3, 4")
+    surg_list =  args.surgered_part.replace(' ', '').split(',')
+    parts = []
+    for oper in surg_list:
+        if oper != "random":
+            if not (args.use_id or args.use_rat or args.eval_id or args.reuse_rat):
+                print('No use of giving bottleneck to perform surgery on if ' +
+                      '"--use_id" and "--use_rat are not given"')
                 exit(1)
-            n_blocks = bottleneck_dict["layer" + lay]
-            if int(blo) not in range(n_blocks):
-                print("For --surgered_part:")
-                print(f"Available blocks for layer{lay}: " + \
-                      str(list(range(n_blocks))))
+            try:
+                lay, blo = oper.split('.')
+                if int(lay) not in range(1, 5):
+                    print(sp_help)
+                    print("Available layers: 1, 2, 3, 4")
+                    exit(1)
+                n_blocks = bottleneck_dict["layer" + lay]
+                if int(blo) not in range(n_blocks):
+                    print("For --surgered_part:")
+                    print(f"Available blocks for layer{lay}: " + \
+                          str(list(range(n_blocks))))
+                    exit(1)
+                layer = "layer" + lay
+                block_n = blo
+            except Exception as e:
+                if type(e) is not SystemExit:
+                    print(sp_help)
                 exit(1)
-            layer = "layer" + lay
-            block_n = blo
-        except Exception as e:
-            if type(e) is not SystemExit:
-                print(sp_help)
-            exit(1)
-    else:
-        layer = np.random.choice(list(bottleneck_dict.keys()))
-        block_n = str(np.random.randint(bottleneck_dict[layer]))
-    return layer, block_n
+        else:
+            layer = np.random.choice(list(bottleneck_dict.keys()))
+            block_n = str(np.random.randint(bottleneck_dict[layer]))
+        parts.append((layer, block_n))
+    return parts
 
 
 def compute_number_of_exps(args):
     total_exps = 0
     if args.eval_original:
         total_exps += 1
+    if args.eval_id:
+        total_exps += 1
     if args.use_id:
-        total_exps += 1
+        total_exps += args.epochs
     if args.use_rat:
-        total_exps += 1
+        total_exps += args.epochs
+    if args.reuse_rat:
+        total_exps += args.epochs
     return total_exps
 
 
@@ -160,15 +119,16 @@ def accuracy(output, target, topk=(1,)):
         return res
 
 
-def perform_surgery(network, layer, block, new_module):
+def perform_surgery(network, layer, block, new_module, seperate_rational=False):
     update_params = list()
     block_int = int(block)
     if type(new_module) is Rational:
-        update_params.extend([new_module.numerator, new_module.denominator])
+        if not seperate_rational:
+            update_params.extend([new_module.numerator, new_module.denominator])
     if layer == 'layer1':
         network.layer1.__setattr__(block, new_module)
         if block_int > 0:
-            previous_bn = network.layer1[block_int]
+            previous_bn = network.layer1[block_int - 1]
         else:
             previous_bn = None
             print("No previous block found, as surgery performed on first block of first layer")
@@ -218,8 +178,10 @@ def perform_surgery(network, layer, block, new_module):
         update_params.extend(list(next_bn.parameters()))
         for param in next_bn.parameters():
             param.requires_grad = True
-    return update_params
-    # import ipdb; ipdb.set_trace()
+    if not seperate_rational:
+        return update_params
+    else:
+        return update_params, [new_module.numerator, new_module.denominator]
 
 
 def identity_rational():
@@ -320,7 +282,7 @@ class ProgressMeter(object):
         return '[' + fmt + '/' + fmt.format(num_batches) + ']'
 
 
-def retrain(train_loader, model, criterion, optimizers, schedulers, epoch, args):
+def retrain(train_loader, model, criterion, optimizers, schedulers, epoch, args, learning=True):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -355,35 +317,37 @@ def retrain(train_loader, model, criterion, optimizers, schedulers, epoch, args)
         top1.update(acc1.item(), input.size(0))
         top5.update(acc5.item(), input.size(0))
 
-        # compute gradient and do SGD step
-        for optimizer in optimizers:
-            optimizer.zero_grad()
 
-        loss.backward()
+        if learning:
+            # compute gradient and do SGD step
+            for optimizer in optimizers:
+                optimizer.zero_grad()
 
-        clip_grad_norm_(model.parameters(), args.clip_grad_value, norm_type=2)
+            loss.backward()
 
-        # update step
-        for optimizer in optimizers:
-            optimizer.step()
-        if schedulers is not None:
-            for idx_scheduler, scheduler in enumerate(schedulers):
-                if scheduler["scheduler"].__class__.__name__ == 'CyclicLR':
-                    scheduler["scheduler"].step()
-                else:
-                    if batch_idx == n_batches - 1:
-                        if scheduler["optimizer"].param_groups[0]["lr"] > scheduler["lr_min"]:
-                            scheduler["scheduler"].step(epoch=epoch)
+            clip_grad_norm_(model.parameters(), args.clip_grad_value, norm_type=2)
+
+            # update step
+            for optimizer in optimizers:
+                optimizer.step()
+            if schedulers is not None:
+                for idx_scheduler, scheduler in enumerate(schedulers):
+                    if scheduler["scheduler"].__class__.__name__ == 'CyclicLR':
+                        scheduler["scheduler"].step()
+                    else:
+                        if batch_idx == n_batches - 1:
+                            if scheduler["optimizer"].param_groups[0]["lr"] > scheduler["lr_min"]:
+                                scheduler["scheduler"].step(epoch=epoch)
 
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
 
-
         if batch_idx % args.print_freq == 0:
             progress.print(batch_idx)
 
-    return top1.avg, top5.avg, losses.avg
+
+    return losses.avg, top1.avg, top5.avg
 
 
 def revalidate(val_loader, model, criterion, epoch, args):
@@ -425,4 +389,4 @@ def revalidate(val_loader, model, criterion, epoch, args):
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
               .format(top1=top1, top5=top5))
 
-    return top1.avg, top5.avg, losses.avg
+    return losses.avg, top1.avg, top5.avg

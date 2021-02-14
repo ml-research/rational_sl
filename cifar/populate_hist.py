@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 import numpy as np
 import torchvision
@@ -12,7 +11,7 @@ import os
 import argparse
 from models import *
 from utils import progress_bar
-from rational.torch import Rational, RecurrentRational
+from rational.torch import Rational
 
 
 # Training

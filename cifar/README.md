@@ -1,35 +1,46 @@
-# Train CIFAR10 with PyTorch
+# Rational Networks on CIFAR10 and CIFAR100
 
-I'm playing with [PyTorch](http://pytorch.org/) on the CIFAR10 dataset.
-
-## Prerequisites
-- Python 3.6+
-- PyTorch 1.0+
+This repository evaluate rational networks on CIFAR(10/100).
+It's based on [kangliu pytorch-cifar repository](https://github.com/kuangliu/pytorch-cifar)
 
 ## Training
 ```
-# Start training with: 
-python main.py
+# To train a LeNet rational network (rn) on with seed 1 on cifar 10
+python3 train.py --arch lenet -s 1 -nt rn --dataset cifar10
 
-# You can manually resume the training with: 
-python main.py --resume --lr=0.01
+# To train a VGG8 recurrent rational network (rrn) with seed 3 on cifar 100 for 20 epochs
+python3 train.py --arch vgg8 -s 3 -nt rrn --dataset cifar100 -e 20
 ```
 
-## Accuracy
-| Model             | Acc.        |
-| ----------------- | ----------- |
-| [VGG16](https://arxiv.org/abs/1409.1556)              | 92.64%      |
-| [ResNet18](https://arxiv.org/abs/1512.03385)          | 93.02%      |
-| [ResNet50](https://arxiv.org/abs/1512.03385)          | 93.62%      |
-| [ResNet101](https://arxiv.org/abs/1512.03385)         | 93.75%      |
-| [RegNetX_200MF](https://arxiv.org/abs/2003.13678)     | 94.24%      |
-| [RegNetY_400MF](https://arxiv.org/abs/2003.13678)     | 94.29%      |
-| [MobileNetV2](https://arxiv.org/abs/1801.04381)       | 94.43%      |
-| [ResNeXt29(32x4d)](https://arxiv.org/abs/1611.05431)  | 94.73%      |
-| [ResNeXt29(2x64d)](https://arxiv.org/abs/1611.05431)  | 94.82%      |
-| [SimpleDLA](https://arxiv.org/abs/1707.064)           | 94.89%      |
-| [DenseNet121](https://arxiv.org/abs/1608.06993)       | 95.04%      |
-| [PreActResNet18](https://arxiv.org/abs/1603.05027)    | 95.11%      |
-| [DPN92](https://arxiv.org/abs/1707.01629)             | 95.16%      |
-| [DLA](https://arxiv.org/abs/1707.064)                 | 95.47%      |
+## Populate histogram
+```
+# To populate the input distribution's histogram for a saved model (-sm):
+python3 populate_hist.py -sm trained_networks/lenet_models_cifar100/models_lenet_rrn_0_xavier.pkl
+```
 
+## Plots
+```
+# For the recurrent rational function's profile with the distance between the function
+python3 plot_populated.py -sm trained_networks/populated/lenet_models_cifar10/models_lenet_rrn_0_xavier.pkl
+
+# For the successive rational functions' profiles with the distance between the function
+python3 plot_populated.py -sm trained_networks/populated/lenet_models_cifar10/models_lenet_rn_0_xavier.pkl --print_dist
+
+# For plot of the different network types on vgg8
+python3 score_evolution.py --arch vgg8 --eval_meth test/accuracy@1
+```
+
+## Score Tables
+```
+# For the table showing train and test accuracies of different net types with different architectures
+python3 scores_table.py
+
+# For the table with train and test accuracies of vgg8 with mixture of rationals and recurrent rationals
+python3 scores_table.py -m vgg8
+```
+
+## Additionally: Number of parameters
+```
+To get the number of params of vgg19 equipped with LeakyReLU (lrelu) network
+python3 number_of_params.py --arch vgg19 -nt lrelu
+```

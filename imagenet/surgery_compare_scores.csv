@@ -1,0 +1,5 @@
+Eval,Lesion,L2.B3,L3.B13,L3.B19,L4.B2
+train,Std. (Veit et al),100.9,120.2,90.5,58.9
+train,rationals,101.1,120.3,104.0,91.1
+test,Std. (Veit et al),93.1,102.0,97.1,81.7
+test,rationals,90.5,102.6,97.6,85.3
