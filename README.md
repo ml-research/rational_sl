@@ -10,7 +10,7 @@ Rational are also here used for lesioning. They replace Residual Blocks in a Res
 |  Eval      | Lesion   |  L2.B3  |  L3.B13 |  L3.B19 |  L4.B2 |
 |  ----      | ------   |  -----  |  ------ |  ------ |  ----- |
 | training   | [Standard](https://arxiv.org/pdf/1605.06431.pdf) |  100.9  |  120.2  |  90.5   |  58.9  |  
-|            | [Rational]() |**101.1**|**120.3**|**104.0**|**91.1**|
+|            | [Rational](https://arxiv.org/pdf/2102.09407.pdf) |**101.1**|**120.3**|**104.0**|**91.1**|
 | testing    | Standard | **93.1**| 102.0   |   97.1  |  81.7  |  
 |            | Rational |   90.5  |**102.6**| **97.6**|**85.3**|
 |% dropped params |     | 0.63    | 2.51    | 2.51    | 10.0   |
