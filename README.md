@@ -1,3 +1,5 @@
+[![ArXiv Badge](https://img.shields.io/badge/Paper-arXiv-blue.svg)](https://arxiv.org/abs/2102.09407)
+
 # Rational Supervised Learning
 Rational Networks in Supervized Learning such as MNIST, CIFAR and Imagenet Classification Tasks.
 
