@@ -352,7 +352,11 @@ def main():
         schedulers.append(scheduler_activation)
 
     losses = []
+<<<<<<< HEAD:mnist/train.py
     rtpt = RTPT(name_initials='QD', experiment_name=f'RatMnist_{args.network_type}_{args.seed}', max_iterations=args.epochs)
+=======
+    rtpt = RTPT(name_initials='Anonym', experiment_name=f'RatMnist_{args.network_type}_{args.seed}', max_iterations=args.epochs)
+>>>>>>> 1e1067ca130a2ecb00d18153483f4000dce73943:mnist/mnist.py
     rtpt.start()
     for epoch in range(1, args.epochs + 1):
 

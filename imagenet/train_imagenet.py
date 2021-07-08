@@ -1,23 +1,15 @@
 import numpy as np
 import torch
-
-torch.manual_seed(17)
-np.random.seed(17)
-
 import argparse
 import os
 import random
 import shutil
 import time
 import warnings
-import sys
 import pickle
 import torch.nn as nn
 import torch.nn.parallel
-import torch.backends.cudnn as cudnn
-import torch.distributed as dist
 import torch.optim
-import torch.multiprocessing as mp
 import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
@@ -89,7 +81,7 @@ parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
 parser.add_argument('--dist-backend', default='nccl', type=str,
                     help='distributed backend')
-parser.add_argument('--seed', default=17, type=int,
+parser.add_argument('--seed', default=0, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpus', default=None, type=str,
                     help='GPU id to use.')
@@ -111,6 +103,7 @@ best_acc1 = 0
 report_dict = {'train/loss': [], 'train/accuracy@1': [], 'train/accuracy@5': [], \
               'validate/loss': [], 'validate/accuracy@1': [], 'validate/accuracy@5': []}
 
+
 def weights_init_xavier(m):
     if isinstance(m, nn.Conv2d):
         nn.init.xavier_normal_(m.weight.data, gain=nn.init.calculate_gain('leaky_relu'))
@@ -121,11 +114,13 @@ def weights_init_xavier(m):
         if m.bias is not None:
             m.bias.data.fill_(0.01)
 
+
 def weights_init_kaiming(m):
     if isinstance(m, nn.Conv2d):
         nn.init.kaiming_normal_(m.weight.data)
         if m.bias is not None:
             m.bias.data.fill_(0.01)
+
 
 def totimestring(seconds):
     day = seconds // (24 * 3600)
@@ -557,7 +552,7 @@ def main_worker(gpu, args):
         validate(val_loader, model, criterion, 0, args)
         return
 
-    rtpt = RTPT(name_initials='QD', experiment_name='ratio_imnet', max_iterations=args.epochs)
+    rtpt = RTPT(name_initials='Anonym', experiment_name='ratio_imnet', max_iterations=args.epochs)
     rtpt.start()
     for epoch in range(args.start_epoch, args.epochs):
         if "srelu" == selected_actf and epoch == srelu_update_epoch:

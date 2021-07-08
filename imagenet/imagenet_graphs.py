@@ -36,8 +36,6 @@ if rrn_filename in os.listdir():
             print("Found and Loaded Reccurent Rational Network")
             break
 
-# import ipdb; ipdb.set_trace()
-
 
 if "mobilenet" in args.filename:
     fig, axes = plt.subplots(6, 6, figsize=(20, 12))
@@ -48,11 +46,6 @@ i = 1
 for rat, ax in zip(rats, axes.flatten()):
     if not 'best_fitted_function' in dir(rat):
         rat.best_fitted_function = None
-    import physt
-    # import ipdb; ipdb.set_trace()
-    from rational.utils.histograms_cupy import Histogram
-    # if type(rat.distribution) is physt.histogram1d.Histogram1D:
-    #     rat.distribution = Histogram()._from_physt(rat.distribution)
     hist_dict = rat.show(display=False)
     hist, line = hist_dict["hist"], hist_dict["line"]
     if i != len(rats):

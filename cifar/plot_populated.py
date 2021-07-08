@@ -2,7 +2,7 @@ import pickle
 import argparse
 from rational.torch import Rational, RecurrentRational
 import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--saved_model', '-sm', action='store', required=True,
@@ -14,6 +14,7 @@ parser.add_argument('--subselect', action='store_true',
 parser.add_argument('--print_dist', action='store_true',
                     help='print the distance between the functions')
 args = parser.parse_args()
+
 
 def decompose_model_path(model_path):
     assert 'rn' in model_path
@@ -34,7 +35,6 @@ def decompose_model_path(model_path):
         print("unknown filename type")
         exit(1)
     return arch, nt, dataset, seed, bn
-
 
 
 arch, nt, dataset, seed, bn = decompose_model_path(args.saved_model)
@@ -103,6 +103,7 @@ for rat, ax in zip(rationals, axes):
     ax.tick_params(axis='y', labelsize=8.5)
     # ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=3))
     # ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=3))
+
     ax2 = ax.twinx()
     ax2.set_yticks([])
     ax2.bar(hist["bins"], hist["freq"], width=hist["width"],

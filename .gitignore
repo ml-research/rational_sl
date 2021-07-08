@@ -2,7 +2,6 @@
 *data
 *checkpoint
 *__pycache__
-*images
 *.svg
 *.pdf
 *.pkl

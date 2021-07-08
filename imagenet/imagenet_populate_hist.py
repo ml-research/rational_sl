@@ -484,7 +484,6 @@ def validate(val_loader, model, criterion, epoch, args):
     progress = ProgressMeter(len(val_loader), batch_time, losses, top1, top5,
                              prefix='Test: ')
 
-    # switch to evaluate mode
     model.eval()
 
     with torch.no_grad():
@@ -494,8 +493,6 @@ def validate(val_loader, model, criterion, epoch, args):
                 input = input.cuda()
                 target = target.cuda()
 
-            # compute output
-            # import ipdb; ipdb.set_trace()
             output = model(input)
             loss = criterion(output, target)
 
@@ -505,14 +502,11 @@ def validate(val_loader, model, criterion, epoch, args):
             top1.update(acc1.item(), input.size(0))
             top5.update(acc5.item(), input.size(0))
 
-            # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
 
             if i % args.print_freq == 0:
                 progress.print(i)
-
-            #break
 
         # TODO: this should also be done with the ProgressMeter
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'

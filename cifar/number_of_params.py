@@ -1,20 +1,10 @@
 '''Train CIFAR10 with PyTorch.'''
-import torch
 import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-import torch.backends.cudnn as cudnn
-import numpy as np
-import torchvision
-import torchvision.transforms as transforms
-import pickle
-import os
 import argparse
-from rtpt import RTPT
 from models import *
-from utils import progress_bar
 
 from rational.torch import Rational, RecurrentRational
+
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)

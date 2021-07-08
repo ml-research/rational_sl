@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 import numpy as np
 import torchvision
@@ -12,7 +11,6 @@ import os
 import argparse
 from rtpt import RTPT
 from models import *
-# from utils import progress_bar
 
 from rational.torch import Rational, RecurrentRational
 
@@ -170,7 +168,6 @@ elif args.init == "he":
     net.apply(weights_init_kaiming)
     print("he/kaiming weight init")
 
-# print(net)
 
 # Training
 def train(epoch):
@@ -192,8 +189,6 @@ def train(epoch):
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
 
-        # progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-        #              % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
     trains_losses.append(train_loss/(batch_idx+1))
     trains_acc.append(100.*correct/total)
 
@@ -214,12 +209,10 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            # progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-            #              % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
     tests_losses.append(test_loss/(batch_idx+1))
     tests_acc.append(100.*correct/total)
 
-rtpt = RTPT(name_initials='QD', experiment_name=f'RationCifar10_{args.nn_type}', max_iterations=args.epochs)
+rtpt = RTPT(name_initials='Anonym', experiment_name=f'RationCifar10_{args.nn_type}', max_iterations=args.epochs)
 
 # Start the RTPT tracking
 rtpt.start()

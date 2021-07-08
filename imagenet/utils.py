@@ -1,7 +1,6 @@
 import random
 import numpy as np
 import torch
-from tqdm import tqdm
 import os
 import torchvision
 import torchvision.datasets as datasets
