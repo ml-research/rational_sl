@@ -1,0 +1,7 @@
+architecture,,lenet,lenet,lenet,lenet,lenet
+net_type,,rn,rrn,r2rr,rr2r,rrr2
+dataset,eval,,,,,
+cifar10,train/accuracy@1,75.7±.9,74.3±.4,76.6±.6,75.1±.5,75.9±1.0
+cifar10,test/accuracy@1,75.5±.7,74.9±.6,76.7±.5,74.9±.4,75.7±.0
+cifar100,train/accuracy@1,44.6±.0,40.7±1.0,43.5±.8,43.7±1.0,44.4±.0
+cifar100,test/accuracy@1,42.8±.6,40.4±.3,42.5±.4,42.3±.0,42.1±.9
